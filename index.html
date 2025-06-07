@@ -1,0 +1,258 @@
+
+<!DOCTYPE html>
+<!--
+  Melik Tecir
+-->
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Message Creator</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background: #f9f9f9; color: #222; }
+    textarea { width: 100%; height: 100px; font-size: 14px; padding: 8px; border-radius: 6px; border: 1.5px solid #ccc; resize: vertical; }
+    .user-row { margin: 8px 0; display: flex; align-items: center; gap: 12px; }
+    .user-row label {
+      font-weight: 600;
+      width: 110px;
+      user-select: none;
+    }
+    select {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1.5px solid #ccc;
+      cursor: pointer;
+      min-width: 140px;
+      background-color: white;
+      transition: border-color 0.2s;
+    }
+    select:hover, select:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+    input.alias-input {
+      width: 150px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1.5px solid #ccc;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    input.alias-input:hover, input.alias-input:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+    .section { margin-bottom: 18px; }
+    input[type="text"] {
+      max-width: 320px;
+      padding: 8px 12px;
+      font-size: 15px;
+      border-radius: 6px;
+      border: 1.5px solid #ccc;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+    .preset-buttons button {
+      margin-right: 8px;
+      margin-top: 4px;
+      padding: 4px 10px;
+      font-size: 15px;
+      border-radius: 6px;
+      border: 1px solid #aaa;
+      background-color: #f0f0f0;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .preset-buttons button:hover {
+      background-color: #e0e0e0;
+    }
+    #copyButton {
+      margin-top: 10px;
+      padding: 8px 16px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
+      user-select: none;
+      transition: background-color 0.25s;
+    }
+    #copyButton:active {
+      background-color: #0056b3;
+    }
+    .output {
+      margin-top: 12px;
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      border: 1.5px solid #ccc;
+      min-height: 130px;
+      user-select: text;
+    }
+  </style>
+</head>
+<body>
+  <h2>Message Creator</h2>
+
+  <div class="section">
+    <label>Başlık (Listenin en üstüne eklenecek):<br />
+      <input type="text" id="title" placeholder="BAŞLIK" />
+    </label>
+  </div>
+
+  <div class="section">
+    <label>Liste (Virgül veya satır ile ayırın):<br />
+      <textarea id="userList" placeholder="ali, @ahmet, mehmet..."></textarea>
+    </label>
+  </div>
+
+  <div class="section">
+    <label>Önek (sadece kullanıcı satırlarına gelecek):<br />
+      <input type="text" id="prefix" placeholder="<3" />
+    </label>
+    <div class="preset-buttons">
+      <button type="button" onclick="setPrefix('⋆.˚🦋')">⋆.˚🦋</button>
+      <button type="button" onclick="setPrefix('˚⊱🪷⊰˚')">˚⊱🪷⊰˚</button>
+      <button type="button" onclick="setPrefix('˚.🎀')">˚.🎀</button>
+      <button type="button" onclick="setPrefix('𐙚')">𐙚</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>Emoji (w1 / w1 w2 varyasyonlarında sona eklenecek):<br />
+      <input type="text" id="emoji" placeholder="🔥 örnek: emoji veya yazı" />
+    </label>
+  </div>
+
+  <div id="userOptionsContainer"></div>
+
+  <button id="copyButton">📋 Kopyala</button>
+  <div class="output" id="output"></div>
+
+  <script>
+    const userListInput = document.getElementById('userList');
+    const prefixInput = document.getElementById('prefix');
+    const titleInput = document.getElementById('title');
+    const emojiInput = document.getElementById('emoji');
+    const container = document.getElementById('userOptionsContainer');
+    const outputDiv = document.getElementById('output');
+    const copyButton = document.getElementById('copyButton');
+
+    function setPrefix(value) {
+      prefixInput.value = value;
+      updateOutput();
+    }
+
+    function createUserOptions(users) {
+      container.innerHTML = '';
+      users.forEach(user => {
+        const row = document.createElement('div');
+        row.className = 'user-row';
+
+        const label = document.createElement('label');
+        label.textContent = '@' + user;
+
+        const select = document.createElement('select');
+        select.innerHTML = `
+          <option value="">(boş)</option>
+          <option value="!">❗</option>
+          <option value="w1">𝓦1</option>
+          <option value="w1 w2">𝓦1-𝓦2</option>
+        `;
+        select.dataset.username = user;
+        select.className = 'variation-select';
+
+        const aliasInput = document.createElement('input');
+        aliasInput.type = 'text';
+        aliasInput.placeholder = '@ikincilhesap';
+        aliasInput.className = 'alias-input';
+        aliasInput.dataset.username = user;
+
+        select.addEventListener('change', updateOutput);
+        aliasInput.addEventListener('input', updateOutput);
+
+        row.appendChild(label);
+        row.appendChild(select);
+        row.appendChild(aliasInput);
+        container.appendChild(row);
+      });
+    }
+
+    function updateOutput() {
+      const prefix = prefixInput.value.trim();
+      const title = titleInput.value.trim();
+      const emoji = emojiInput.value.trim();
+      const rows = container.querySelectorAll('.user-row');
+
+      const lines = [];
+
+      if (title) lines.push(title);
+
+      rows.forEach(row => {
+        const select = row.querySelector('.variation-select');
+        const aliasInput = row.querySelector('.alias-input');
+        const user = select.dataset.username;
+        const variation = select.value;
+        const alias = aliasInput.value.trim();
+
+        let variationText = '';
+        if (variation === '') {
+          variationText = '➸';
+        } else if (variation === '!') {
+          variationText = '➸❗';
+        } else if (variation === 'w1') {
+          variationText = '➸𝓦1' + (emoji ? ' ' + emoji : '');
+        } else if (variation === 'w1 w2') {
+          variationText = '➸𝓦1-𝓦2' + (emoji ? ' ' + emoji : '');
+        }
+
+        let line = '';
+        if (prefix) line += prefix + ' ';
+        line += '@' + user + variationText;
+
+        lines.push(line);
+
+        if (alias) {
+          lines.push('↪️@' + alias.replace(/^@/, ''));
+        }
+      });
+
+      outputDiv.textContent = lines.join('\n');
+    }
+
+    function handleInput() {
+      const raw = userListInput.value;
+      const users = raw
+        .split(/[\n,]+/)
+        .map(u => u.trim().replace(/^@/, ''))
+        .filter(u => u.length > 0);
+      createUserOptions(users);
+      updateOutput();
+    }
+
+    copyButton.addEventListener('click', () => {
+      const text = outputDiv.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const original = copyButton.textContent;
+        copyButton.textContent = '✅ Kopyalandı!';
+        setTimeout(() => {
+          copyButton.textContent = original;
+        }, 1500);
+      });
+    });
+
+    userListInput.addEventListener('input', handleInput);
+    prefixInput.addEventListener('input', updateOutput);
+    titleInput.addEventListener('input', updateOutput);
+    emojiInput.addEventListener('input', updateOutput);
+  </script>
+</body>
+</html>
