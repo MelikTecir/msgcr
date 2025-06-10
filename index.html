@@ -130,6 +130,7 @@
         select.innerHTML = `
           <option value="">(boş)</option>
           <option value="!">❗</option>
+          <option value="M">ℳ</option>
           <option value="w1">𝓦1</option>
           <option value="w1 w2">𝓦1-𝓦2</option>
         `;
@@ -171,6 +172,7 @@
 
         let variationText = '➸';
         if (variation === '!') variationText = '➸❗';
+        else if (variation === 'M') variationText = '➸ℳ';
         else if (variation === 'w1') variationText = '➸𝓦1' + (emoji ? ' ' + emoji : '');
         else if (variation === 'w1 w2') variationText = '➸𝓦1-𝓦2' + (emoji ? ' ' + emoji : '');
 
